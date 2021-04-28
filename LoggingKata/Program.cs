@@ -21,6 +21,9 @@ namespace LoggingKata
             // Log and error if you get 0 lines and a warning if you get 1 line
             var lines = File.ReadAllLines(csvPath);
 
+            if (lines.Length == 0) { logger.LogError("No data to compare"); }
+            if (lines.Length == 1) { logger.LogError("Not enough locations to compare, we need at least 2"); }
+
             logger.LogInfo($"Lines: {lines[0]}");
 
             // Create a new instance of your TacoParser class
@@ -30,7 +33,7 @@ namespace LoggingKata
             var locations = lines.Select(parser.Parse).ToArray();
 
             // DON'T FORGET TO LOG YOUR STEPS
-
+            logger.LogInfo("Starting comparison");
             // Now that your Parse method is completed, START BELOW ----------
 
             // TODO: Create two `ITrackable` variables with initial values of `null`. These will be used to store your two taco bells that are the farthest from each other.
@@ -50,20 +53,16 @@ namespace LoggingKata
             // If the distance is greater than the currently saved distance, update the distance and the two `ITrackable` variables you set above
             // Once you've looped through everything, you've found the two Taco Bells farthest away from each other.
 
-            for (int i = 0; i < locations.Length; i++)
+            foreach(var locA in locations)
             {
-                var locA = locations[i];
                 GeoCoordinate corA = new GeoCoordinate(locA.Location.Latitude, locA.Location.Longitude);
-
-                for (int k = 0; k < locations.Length; k++)
+                foreach (var locB in locations)
                 {
-                    var locB = locations[k];
                     GeoCoordinate corB = new GeoCoordinate(locB.Location.Latitude, locB.Location.Longitude);
-
                     double distanceBetween = corA.GetDistanceTo(corB);
-
                     if (distanceBetween > distance)
                     {
+                        logger.LogInfo($"Found new furthest distance: {distanceBetween} meters from {locA.Name} and {locB.Name}");
                         tacoBell1 = locA;
                         tacoBell2 = locB;
                         distance = distanceBetween;
